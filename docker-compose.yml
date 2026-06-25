@@ -1,0 +1,15 @@
+services:
+  app:
+    image: pventabase:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/pventabase_db
+      - SPRING_DATASOURCE_USERNAME=miguel
+      - SPRING_DATASOURCE_PASSWORD=Gallego
+    restart: unless-stopped
