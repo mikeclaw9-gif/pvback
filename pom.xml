@@ -26,6 +26,7 @@
         <module>pventabase-login</module>
         <module>pventabase-inventario</module>
         <module>pventabase-clientes</module>
+        <module>pventabase-ventas</module>
     </modules>
 
     <properties>
@@ -97,6 +98,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.pventabase</groupId>
+                <artifactId>pventabase-ventas</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
                 <version>${jjwt.version}</version>
@@ -125,6 +131,14 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -152,6 +166,16 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.10.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.3.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

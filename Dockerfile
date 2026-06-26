@@ -8,6 +8,7 @@ COPY pventabase-usuarios/pom.xml pventabase-usuarios/
 COPY pventabase-login/pom.xml pventabase-login/
 COPY pventabase-inventario/pom.xml pventabase-inventario/
 COPY pventabase-clientes/pom.xml pventabase-clientes/
+COPY pventabase-ventas/pom.xml pventabase-ventas/
 COPY pventabase-app/pom.xml pventabase-app/
 
 RUN mvn dependency:go-offline -B
@@ -17,6 +18,7 @@ COPY pventabase-usuarios/src pventabase-usuarios/src/
 COPY pventabase-login/src pventabase-login/src/
 COPY pventabase-inventario/src pventabase-inventario/src/
 COPY pventabase-clientes/src pventabase-clientes/src/
+COPY pventabase-ventas/src pventabase-ventas/src/
 COPY pventabase-app/src pventabase-app/src/
 
 RUN mvn package -DskipTests -B -pl pventabase-app -am

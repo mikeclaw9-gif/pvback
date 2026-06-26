@@ -30,4 +30,8 @@ public class ProductoRequestDTO {
 
     @Min(0)
     private Integer existencia = 0;
+
+    private Boolean pesado = false;
+
+    private String imagenUrl;
 }

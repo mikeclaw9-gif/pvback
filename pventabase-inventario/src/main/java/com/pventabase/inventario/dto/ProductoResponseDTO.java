@@ -16,4 +16,6 @@ public class ProductoResponseDTO extends BaseResponseDTO {
     private BigDecimal precioCompra;
     private BigDecimal precioVenta;
     private Integer existencia;
+    private Boolean pesado;
+    private String imagenUrl;
 }

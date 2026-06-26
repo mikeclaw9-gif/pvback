@@ -44,4 +44,10 @@ public class Producto extends BaseEntity {
     @Min(0)
     @Column(nullable = false)
     private Integer existencia = 0;
+
+    @Column(nullable = false)
+    private Boolean pesado = false;
+
+    @Column(name = "imagen_url", length = 500)
+    private String imagenUrl;
 }
