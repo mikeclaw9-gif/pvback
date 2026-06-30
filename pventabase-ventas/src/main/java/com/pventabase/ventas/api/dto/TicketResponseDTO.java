@@ -25,6 +25,7 @@ public class TicketResponseDTO {
     @Builder
     public static class LineaTicket {
         private String producto;
+        private String descripcion;
         private BigDecimal cantidad;
         private String unidad;
         private BigDecimal precioUnitario;

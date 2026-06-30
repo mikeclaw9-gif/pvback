@@ -13,6 +13,7 @@ public class DetalleVentaResponseDTO extends BaseResponseDTO {
     private Long productoId;
     private String productoCodigo;
     private String productoNombre;
+    private String productoDescripcion;
     private Boolean productoPesado;
     private BigDecimal cantidad;
     private BigDecimal precioUnitario;

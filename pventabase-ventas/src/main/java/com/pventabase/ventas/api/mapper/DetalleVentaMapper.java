@@ -14,6 +14,7 @@ public interface DetalleVentaMapper {
     @Mapping(target = "productoCodigo", source = "producto.codigo")
     @Mapping(target = "productoNombre", source = "producto.nombre")
     @Mapping(target = "productoPesado", source = "producto.pesado")
+    @Mapping(target = "productoDescripcion", source = "producto.descripcion")
     DetalleVentaResponseDTO toResponseDTO(DetalleVenta detalleVenta);
 
     @Mapping(target = "id", ignore = true)
