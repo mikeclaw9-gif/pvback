@@ -228,6 +228,32 @@ pvback/
 
 **DTOs:** `GastoRequestDTO`, `GastoResponseDTO` (extends BaseResponseDTO)
 
+**DetalleVentaResponseDTO** (extends BaseResponseDTO):
+| Campo | Fuente |
+|-------|--------|
+| productoId | `Producto.id` |
+| productoCodigo | `Producto.codigo` |
+| productoNombre | `Producto.nombre` |
+| productoDescripcion | `Producto.descripcion` |
+| productoPesado | `Producto.pesado` |
+| cantidad | `DetalleVenta.cantidad` |
+| precioUnitario | `DetalleVenta.precioUnitario` |
+| descuentoPorcentaje | `DetalleVenta.descuentoPorcentaje` |
+| subtotal | `DetalleVenta.subtotal` |
+
+**TicketResponseDTO** — generado por `VentaService.generateTicket()`:
+| Campo | Descripción |
+|-------|-------------|
+| ventaId | ID de la venta |
+| fecha | Fecha de la venta |
+| atendidoPor | Email del usuario que atendió |
+| cliente | Nombre del cliente o "Mostrador" |
+| lineas | List<LineaTicket> con producto, descripcion, cantidad, unidad (kg/pza), precioUnitario, descuento, importe |
+| subtotal | Suma de subtotales |
+| descuentoPorcentaje | Descuento global de la venta |
+| descuentoAplicado | Monto descontado |
+| total | Total final |
+
 **Queries adicionales en GastoRepository:**
 - `sumMontoEntreFechas(inicio, fin)` — suma de montos en rango (para corte de caja)
 

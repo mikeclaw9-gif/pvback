@@ -27,13 +27,17 @@ Multi-módulo Maven con 10 módulos:
 
 ## Ejecución rápida
 
+Primera vez (o después de `mvn clean`):
+
 ```sh
-# Compilar
-mvn package -DskipTests -pl pventabase-app -am
+# Compilar e instalar todos los módulos en el repo local de Maven
+mvn install -DskipTests
 
 # Ejecutar
 mvn spring-boot:run -pl pventabase-app
 ```
+
+**Importante**: `mvn package` no basta — `spring-boot:run` resuelve dependencias desde `~/.m2/repository`, no desde `target/` de los módulos hermanos. Usar `mvn install` (o `mvn install -DskipTests -pl pventabase-app -am` para solo afectar el árbol de `app`).
 
 ## Documentación API
 

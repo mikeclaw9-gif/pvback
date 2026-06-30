@@ -1,126 +1,112 @@
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it BEFORE grep/find or reading files when you need to understand or locate code:
-
-- **MCP tools** (when available): `codegraph_explore` answers most code questions in one call — the relevant symbols' verbatim source plus the call paths between them. `codegraph_node` returns one symbol's source + callers, or reads a whole file with line numbers. If the tools are listed but deferred, load them by name via tool search.
-- **Shell** (always works): `codegraph explore "<symbol names or question>"` and `codegraph node <symbol-or-file>` print the same output.
-
-If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
+Este repo tiene `.codegraph/` — usa `codegraph_explore` (MCP) o `codegraph explore` (shell) ANTES de grep/Read para entender símbolos y flujos. Name a file or symbol in the query.
 <!-- CODEGRAPH_END -->
 
-## Project: pventabase
+## pventabase
 
-Point-of-sale REST API. Spring Boot 3.2.5 / Java 17 / Maven multi-module / PostgreSQL + Flyway / JWT auth.
+POS REST API. Spring Boot 3.2.5 / Java 17 / Maven multi-módulo / PostgreSQL + Flyway / JWT auth.
 
-### Modules
+### Módulos (10)
 
-| Module | Purpose |
-|--------|---------|
-| `pventabase-common` | Shared kernel — `BaseEntity`, exceptions, DTOs, constants |
-| `pventabase-usuarios` | User CRUD + roles (ROLE_ADMIN, ROLE_USER, ROLE_VENDEDOR) |
-| `pventabase-login` | JWT auth (`/auth/login`, `/auth/register`). Depends on usuarios module |
-| `pventabase-inventario` | Products CRUD |
-| `pventabase-clientes` | Clients CRUD + soft delete |
-| `pventabase-ventas` | Sales CRUD, details, ticket generation, finalize/void flow |
-| `pventabase-gastos` | Expenses CRUD with categories and payment methods |
-| `pventabase-corte-caja` | Cash register opening/closing with automatic totals |
-| `pventabase-reportes` | Reports (ventas, productos, gastos, stock, clientes, cortes, dashboard) with Excel/PDF/JSON/Print export |
+| Módulo | Propósito |
+|--------|-----------|
+| `pventabase-common` | `BaseEntity`, excepciones, DTOs, constantes |
+| `pventabase-usuarios` | CRUD usuarios + roles |
+| `pventabase-login` | `/auth/login`, `/auth/register`, JWT |
+| `pventabase-inventario` | CRUD productos |
+| `pventabase-clientes` | CRUD clientes + soft delete |
+| `pventabase-ventas` | Ventas, detalles, finalizar/anular, ticket |
+| `pventabase-gastos` | Gastos por categoría + método pago |
+| `pventabase-corte-caja` | Apertura/cierre caja con totales automáticos |
+| `pventabase-reportes` | Reportes exportables (Excel/PDF/JSON/Print) |
 | `pventabase-app` | Entry point, SecurityConfig, GlobalExceptionHandler, OpenAPI, Flyway migrations |
 
-### Architecture conventions
+### Arquitectura
 
-- Entry point: `PventabaseApplication` (`pventabase-app`) — `@SpringBootApplication(scanBasePackages = "com.pventabase")` scans all modules; same for `@EntityScan` and `@EnableJpaRepositories`
-- Constructor injection only (`@RequiredArgsConstructor`)
-- `@Transactional` exclusively on Service classes; `@Valid` on Controller DTOs
-- Layered per module: `controller/` → `dto/` → `entity/` → `mapper/` → `repository/` → `service/`
-- Cross-module dependencies allowed (e.g. `pventabase-ventas` depends on `pventabase-clientes`, `pventabase-inventario`, `pventabase-usuarios`; `pventabase-corte-caja` depends on `pventabase-ventas`, `pventabase-gastos`, `pventabase-usuarios`; `pventabase-reportes` depends on all domain modules)
+- **Entry point**: `PventabaseApplication` — `scanBasePackages = "com.pventabase"`, igual para `@EntityScan` y `@EnableJpaRepositories`
+- **Inyección**: solo constructor con `@RequiredArgsConstructor`
+- **`@Transactional`** solo en Services; `@Valid` solo en DTOs de Controller
+- **Layers por módulo**: `controller/` → `dto/` → `entity/` → `mapper/` → `repository/` → `service/`
+- **Dependencias cross-module**: `ventas` → `clientes`+`inventario`+`usuarios`; `corte-caja` → `ventas`+`gastos`+`usuarios`; `reportes` → todos los módulos de dominio
+- **Paginación**: todos los `findAll` usan `PageResponseDTO<T>` con `page`, `size`, `sortBy`, `sortDir`
 
-### Key commands
+### Comandos
 
 ```sh
-# Build the whole project (skip tests)
-mvn clean package -DskipTests
+# Build completo (skip tests)
+mvn clean install -DskipTests
 
-# Build only the app module (what Dockerfile does)
-mvn package -DskipTests -pl pventabase-app -am
+# Build + install solo app module (lo mismo que Dockerfile, pero install, no package)
+mvn install -DskipTests -pl pventabase-app -am
 
-# Run
+# Run (requiere haber hecho install primero)
 mvn spring-boot:run -pl pventabase-app
 ```
 
-### API & server
+### API
 
-| Resource | URL |
-|----------|-----|
+| Recurso | URL |
+|---------|-----|
 | Base | `http://localhost:8090/api` |
 | Swagger UI | `/api/swagger-ui.html` |
 | OpenAPI JSON | `/api/v3/api-docs` |
 
-All endpoints except `/auth/**` require `Authorization: Bearer <token>`. **However**, `SecurityConfig` currently has `.anyRequest().permitAll()` — the JWT filter runs (authenticates if valid token present) but does **not** block unauthenticated requests.
+### Seguridad
 
-### Security
+- **Endpoints públicos**: `/health`, `/auth/**`, `/v3/api-docs/**`, `/swagger-ui/**`
+- **Todo lo demás**: `.anyRequest().authenticated()` — el JWT filter corre primero, si hay token válido lo autentica, si no hay token deniega 401
+- JWT: HMAC-SHA256, secret `PventabaseClaveSecretaSegura2026ParaJWT`, exp 24h
+- Claims: `sub` = email, `rol` = string (e.g. `ROLE_ADMIN`)
+- Password encoder: BCrypt
+- CSRF disabled, STATELESS, CORS `*` con credentials
+- Controladores obtienen usuario autenticado vía `Authentication authentication` como parámetro del método
 
-- JWT with HMAC-SHA256. Secret: `PventabaseClaveSecretaSegura2026ParaJWT`. Expiration: 24h (86400000ms).
-- Password encoder: BCrypt (`PasswordEncoder` bean)
-- CSRF disabled. Session: STATELESS. CORS: all origins allowed with credentials.
-- JWT claims: `sub` = email, `rol` = role string (e.g. `ROLE_ADMIN`)
+### BD
 
-### Database
+- PostgreSQL. `ddl-auto=validate` — Flyway administra el schema
+- `spring.jpa.open-in-view=false` — si ves `LazyInitializationException`, falta `@Transactional(readOnly = true)`
+- Timezone: `America/Argentina/Buenos_Aires`
+- 10 migrations (V1–V10) en `pventabase-app/src/main/resources/db/migration/`
 
-- PostgreSQL. DDL: `spring.jpa.hibernate.ddl-auto=validate` — Flyway manages schema
-- 10 Flyway migrations (V1–V10) in `pventabase-app/src/main/resources/db/migration/`
+### Quirks de mapeo
 
-### Notable mapping quirks
+- `Cliente`: `direccion` → DB `domicilio`, `telefono` → `celular`, `email` → `correo`
+- `Producto`: override de columnas audit → `fecha_creacion`/`fecha_modificacion`
+- Todos los MapStruct mappers ignoran `BaseEntity` fields (`id`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `activo`) en `toEntity`/`updateEntity`
+- `UsuarioMapper.updateEntity` también ignora `password`
+- `ClienteMapper.toEntity`/`updateEntity` también ignoran `eliminado`
+- Lombok + MapStruct: requieren `lombok-mapstruct-binding` 0.2.0 en annotationProcessorPaths
 
-- `Cliente` entity maps frontend field names to different DB columns: `direccion` → `domicilio`, `telefono` → `celular`, `email` → `correo`
-- All MapStruct mappers (via `componentModel = "spring"`) ignore `BaseEntity` fields (id, createdAt, updatedAt, createdBy, updatedBy, activo) on `toEntity`/`updateEntity`
-- `UsuarioMapper.updateEntity` also ignores `password`
-- `ClienteMapper.toEntity`/`updateEntity` also ignore `eliminado`
-- Lombok + MapStruct annotation processing order is handled by `lombok-mapstruct-binding` 0.2.0 in the compiler plugin config
+### Decisiones de diseño notables (no revertir)
 
-### Key bugs fixed in this session
+- `VentaService.create()` crea ventas con estado `PENDIENTE`, stock se descuenta solo en `finalizarVenta()`
+- `VentaService.agregarDetalle()` y `eliminarDetalle()` solo funcionan en estado `PENDIENTE`
+- `DetalleVentaResponseDTO` incluye `productoDescripcion` mapeado desde `Producto.descripcion`; `TicketResponseDTO.LineaTicket` incluye `descripcion` (ambos agregados en la sesión del 30 Jun 2026)
+- `ReporteController` recibe filtros como string JSON (`filter` param) parseado con Jackson, no query params individuales
+- `@SuppressFBWarnings("EI_EXPOSE_REP2")` en constructores con `@RequiredArgsConstructor(onConstructor_ = ...)` — patrón usado en services
 
-- `VentaService.create()` used `COMPLETADA` status but `agregarDetalle()` required `PENDIENTE` — changed create to set `PENDIENTE` and removed stock deduction (now done in `finalizarVenta()`)
-- `GlobalExceptionHandler` was missing handlers for `VentaNoEncontradaException` and `StockInsuficienteException` — added both (return 404 and 400 respectively)
-- Added `metodoPago` field to `Venta` entity for payment method breakdown in reports and corte de caja
-- `ReporteService` had no `@Transactional` causing `LazyInitializationException` on lazy associations — added `@Transactional(readOnly = true)`
-- `ReporteController` expected individual query params but frontend sends `filter` JSON string — changed to parse `filter` parameter with Jackson
+### Checkstyle
 
-### Flyway migrations
-
-| Migration | Description |
-|-----------|-------------|
-| V1 | Create usuarios table |
-| V2 | Add audit columns to usuarios |
-| V3 | Create producto table |
-| V4 | Create clientes table |
-| V5 | Add documento to clientes |
-| V6 | Create ventas + detalle_venta tables, add pesado to producto |
-| V7 | Add imagen_url to producto |
-| V8 | Create gastos table |
-| V9 | Add metodo_pago to ventas |
-| V10 | Create cortes_caja table |
+Solo `pventabase-ventas/checkstyle.xml` existe con reglas mínimas. No hay SpotBugs config ni CI.
 
 ### Docker
 
 ```sh
-# Build image
 docker build -t pventabase:1.0 .
-
-# Run (expects external PostgreSQL)
 docker compose up
 ```
 
-Note: `docker-compose.yml` has no PostgreSQL service — assumes an external instance at `host.docker.internal:5432/pventabase_db`. The Dockerfile builds with `mvn package -DskipTests -pl pventabase-app -am`.
+`docker-compose.yml` NO tiene PostgreSQL — espera instancia externa en `host.docker.internal:5432/pventabase_db`.
 
-### What's missing
+### Lo que NO existe
 
-- No tests exist anywhere in the repo
-- No lint/format/typecheck tooling configured
-- No CI workflows
-- No pre-commit hooks
+- Tests (cero en todo el repo)
+- Lint/format/typecheck tooling
+- CI workflows
+- Pre-commit hooks
 
 ### How to Answer
-Always answer in Spanish, using short answers; when asked for an explanation, provide more detailed answers.
-Always add the following text at the end of your answers: “ ---RESPUESTA---”
+
+Siempre responde en español, con respuestas cortas. Cuando te pidan explicación, da más detalle. Termina siempre con: `---RESPUESTA---`

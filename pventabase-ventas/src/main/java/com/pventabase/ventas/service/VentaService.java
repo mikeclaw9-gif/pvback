@@ -189,6 +189,7 @@ public class VentaService {
         List<TicketResponseDTO.LineaTicket> lineas = venta.getDetalles().stream()
                 .map(d -> TicketResponseDTO.LineaTicket.builder()
                         .producto(d.getProducto().getNombre())
+                        .descripcion(d.getProducto().getDescripcion())
                         .cantidad(d.getCantidad())
                         .unidad(d.getProducto().getPesado() ? "kg" : "pza")
                         .precioUnitario(d.getPrecioUnitario())
