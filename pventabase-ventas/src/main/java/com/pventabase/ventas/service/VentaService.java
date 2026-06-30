@@ -118,7 +118,7 @@ public class VentaService {
 
         Venta venta = new Venta();
         venta.setFecha(LocalDateTime.now());
-        venta.setEstado(Venta.EstadoVenta.COMPLETADA);
+        venta.setEstado(Venta.EstadoVenta.PENDIENTE);
         venta.setCliente(cliente);
         venta.setUsuario(usuario);
         venta.setDescuentoPorcentaje(requestDTO.getDescuentoPorcentaje());
@@ -129,11 +129,6 @@ public class VentaService {
             Producto producto = productoRepository.findById(detalleDTO.getProductoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Producto", detalleDTO.getProductoId()));
 
-            if (producto.getExistencia() < detalleDTO.getCantidad().intValue()) {
-                throw new StockInsuficienteException(producto.getNombre(), producto.getExistencia(),
-                        detalleDTO.getCantidad().intValue());
-            }
-
             DetalleVenta detalle = new DetalleVenta();
             detalle.setVenta(venta);
             detalle.setProducto(producto);
@@ -143,8 +138,6 @@ public class VentaService {
             detalle.calcularSubtotal();
 
             detalles.add(detalle);
-            producto.setExistencia(producto.getExistencia() - detalleDTO.getCantidad().intValue());
-            productoRepository.save(producto);
         }
 
         venta.setDetalles(detalles);

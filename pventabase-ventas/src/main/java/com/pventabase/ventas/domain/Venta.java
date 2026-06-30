@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +27,10 @@ public class Venta extends BaseEntity {
 
     @Column(precision = 5, scale = 2)
     private Integer descuentoPorcentaje;
+
+    @Size(max = 50)
+    @Column(name = "metodo_pago", length = 50)
+    private String metodoPago;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

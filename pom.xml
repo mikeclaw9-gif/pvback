@@ -27,6 +27,9 @@
         <module>pventabase-inventario</module>
         <module>pventabase-clientes</module>
         <module>pventabase-ventas</module>
+        <module>pventabase-gastos</module>
+        <module>pventabase-corte-caja</module>
+        <module>pventabase-reportes</module>
     </modules>
 
     <properties>
@@ -39,6 +42,9 @@
         <springdoc.version>2.3.0</springdoc.version>
         <testcontainers.version>1.19.8</testcontainers.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <poi.version>5.2.5</poi.version>
+        <jfreechart.version>1.5.4</jfreechart.version>
+        <openpdf.version>1.3.39</openpdf.version>
     </properties>
 
     <dependencyManagement>
@@ -101,6 +107,36 @@
                 <groupId>com.pventabase</groupId>
                 <artifactId>pventabase-ventas</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.pventabase</groupId>
+                <artifactId>pventabase-gastos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.pventabase</groupId>
+                <artifactId>pventabase-corte-caja</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.pventabase</groupId>
+                <artifactId>pventabase-reportes</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jfree</groupId>
+                <artifactId>jfreechart</artifactId>
+                <version>${jfreechart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.librepdf</groupId>
+                <artifactId>openpdf</artifactId>
+                <version>${openpdf.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>

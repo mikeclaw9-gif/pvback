@@ -5,6 +5,8 @@ import com.pventabase.common.exception.BusinessException;
 import com.pventabase.common.exception.DuplicateResourceException;
 import com.pventabase.common.exception.InvalidStateException;
 import com.pventabase.common.exception.ResourceNotFoundException;
+import com.pventabase.ventas.exception.StockInsuficienteException;
+import com.pventabase.ventas.exception.VentaNoEncontradaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +32,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidStateException.class)
     public ResponseEntity<ErrorResponse> handleInvalidState(InvalidStateException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage());
+    }
+
+    @ExceptionHandler(VentaNoEncontradaException.class)
+    public ResponseEntity<ErrorResponse> handleVentaNotFound(VentaNoEncontradaException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getErrorCode(), ex.getMessage());
+    }
+
+    @ExceptionHandler(StockInsuficienteException.class)
+    public ResponseEntity<ErrorResponse> handleStockInsuficiente(StockInsuficienteException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getErrorCode(), ex.getMessage());
     }
 
